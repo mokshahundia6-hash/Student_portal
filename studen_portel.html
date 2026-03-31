@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduSphere — Student Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ed;
+    --card: #ffffff;
+    --ink: #1a1612;
+    --muted: #7a7168;
+    --accent: #c8563a;
+    --accent2: #3a7dc8;
+    --accent3: #4caf7d;
+    --warn: #e8a838;
+    --border: #e4dfd8;
+    --shadow: 0 2px 20px rgba(26,22,18,0.08);
+    --radius: 16px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 64px;
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #f0a87a; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .notif-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+    position: relative;
+  }
+  .notif-btn:hover { background: rgba(255,255,255,0.2); }
+  .notif-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: absolute;
+    top: 6px; right: 6px;
+    border: 2px solid var(--ink);
+  }
+  .avatar-small {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0a87a, #c8563a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+
+  /* ── LAYOUT ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .nav-section { margin-bottom: 8px; }
+  .nav-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 24px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: .9rem;
+    font-weight: 400;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--ink); }
+  .nav-item.active {
+    background: #fdf0eb;
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    padding: 36px 40px;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGE SECTIONS ── */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeUp .4s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 32px; }
+  .page-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .page-header p { color: var(--muted); font-size: .92rem; }
+
+  /* ── GRID HELPERS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── STAT CARD ── */
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(26,22,18,0.12); }
+  .stat-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  .stat-val {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-label { font-size: .8rem; color: var(--muted); font-weight: 500; }
+  .stat-trend { font-size: .78rem; color: var(--accent3); font-weight: 600; }
+
+  /* ── PROFILE HERO ── */
+  .profile-hero {
+    background: var(--ink);
+    border-radius: var(--radius);
+    padding: 36px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-hero::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(240,168,122,0.12);
+  }
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    right: 40px; bottom: -60px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(200,86,58,0.15);
+  }
+  .avatar-lg {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0a87a, #c8563a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    color: #fff;
+    font-weight: 700;
+    border: 4px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .profile-info { z-index: 1; }
+  .profile-info h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .profile-info .sub {
+    color: rgba(255,255,255,0.65);
+    font-size: .88rem;
+    margin-bottom: 12px;
+  }
+  .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ptag {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: .78rem;
+    font-weight: 500;
+  }
+
+  /* ── INFO ROWS ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .info-key { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+  .info-val { font-size: .92rem; font-weight: 500; color: var(--ink); }
+
+  /* ── TIMETABLE ── */
+  .timetable { width: 100%; border-collapse: collapse; }
+  .timetable th {
+    background: var(--bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .timetable td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+    vertical-align: middle;
+  }
+  .timetable tr:last-child td { border-bottom: none; }
+  .timetable tr:hover td { background: var(--bg); }
+  .subj-pill {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+
+  /* ── ATTENDANCE BAR ── */
+  .att-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .att-meta { display: flex; justify-content: space-between; font-size: .84rem; }
+  .att-bar-bg {
+    background: var(--bg);
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .att-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── MARKS TABLE ── */
+  .marks-table { width: 100%; border-collapse: collapse; }
+  .marks-table th {
+    background: var(--bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .marks-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+  }
+  .marks-table tr:last-child td { border-bottom: none; }
+  .grade-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+
+  /* ── NOTICE BOARD ── */
+  .notice-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .notice-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .notice-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .notice-title { font-weight: 600; font-size: .9rem; margin-bottom: 2px; }
+  .notice-meta { font-size: .78rem; color: var(--muted); }
+
+  /* ── ASSIGNMENT ITEMS ── */
+  .assign-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .assign-item:last-child { border-bottom: none; }
+  .assign-check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .assign-check.done { background: var(--accent3); border-color: var(--accent3); color: #fff; }
+  .assign-title { flex: 1; font-size: .9rem; }
+  .assign-due { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+  .overdue { color: var(--accent) !important; font-weight: 600; }
+
+  /* ── HAMBURGER ── */
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  /* ── OVERLAY ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 98;
+  }
+  .overlay.open { display: block; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    .hamburger { display: block; }
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      left: -260px;
+      top: 64px;
+      height: calc(100vh - 64px);
+      width: 240px;
+      z-index: 99;
+      transition: left .3s ease;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+    }
+    .sidebar.open { left: 0; }
+    .main { padding: 24px 18px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .profile-hero { flex-direction: column; text-align: center; gap: 20px; }
+    .profile-tags { justify-content: center; }
+    .info-grid { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 1.5rem; }
+  }
+  @media (max-width: 420px) {
+    .grid-4 { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="logo">Edu<span>Sphere</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="notif-btn">
+      🔔
+      <span class="notif-dot"></span>
+    </button>
+    <div class="avatar-small" title="Aarav Shah">AS</div>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-item" data-page="profile">
+        <span class="nav-icon">👤</span> My Profile
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Academics</div>
+      <div class="nav-item" data-page="timetable">
+        <span class="nav-icon">📅</span> Timetable
+      </div>
+      <div class="nav-item" data-page="attendance">
+        <span class="nav-icon">✅</span> Attendance
+      </div>
+      <div class="nav-item" data-page="marks">
+        <span class="nav-icon">📊</span> Marks & Grades
+      </div>
+      <div class="nav-item" data-page="assignments">
+        <span class="nav-icon">📝</span> Assignments
+        <span class="nav-badge">3</span>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">School</div>
+      <div class="nav-item" data-page="notices">
+        <span class="nav-icon">📢</span> Notice Board
+        <span class="nav-badge">2</span>
+      </div>
+      <div class="nav-item" data-page="fees">
+        <span class="nav-icon">💳</span> Fees
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Good morning, Aarav 👋</h1>
+        <p>Tuesday, 31 March 2026 · Std X — Division A</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fdf0eb">📚</div>
+          <div class="stat-val" style="color:var(--accent)">6</div>
+          <div class="stat-label">Subjects</div>
+          <div class="stat-trend">Current Semester</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf5f1">✅</div>
+          <div class="stat-val" style="color:var(--accent3)">88%</div>
+          <div class="stat-label">Attendance</div>
+          <div class="stat-trend">↑ 2% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf1f9">🏆</div>
+          <div class="stat-val" style="color:var(--accent2)">A</div>
+          <div class="stat-label">Overall Grade</div>
+          <div class="stat-trend">Aggregate 87.4%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fffaed">📝</div>
+          <div class="stat-val" style="color:var(--warn)">3</div>
+          <div class="stat-label">Pending Tasks</div>
+          <div class="stat-trend">Due this week</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:24px">
+        <!-- Today's Schedule -->
+        <div class="card">
+          <div class="card-title">📅 Today's Schedule</div>
+          <table class="timetable">
+            <thead><tr><th>Time</th><th>Subject</th><th>Room</th></tr></thead>
+            <tbody>
+              <tr><td>8:00 – 8:45</td><td><span class="subj-pill" style="background:#fdf0eb;color:var(--accent)">Mathematics</span></td><td>R-12</td></tr>
+              <tr><td>8:45 – 9:30</td><td><span class="subj-pill" style="background:#edf1f9;color:var(--accent2)">Science</span></td><td>Lab 2</td></tr>
+              <tr><td>9:45 – 10:30</td><td><span class="subj-pill" style="background:#edf5f1;color:var(--accent3)">English</span></td><td>R-08</td></tr>
+              <tr><td>10:30 – 11:15</td><td><span class="subj-pill" style="background:#fffaed;color:var(--warn)">History</span></td><td>R-05</td></tr>
+              <tr><td>11:30 – 12:15</td><td><span class="subj-pill" style="background:#fdf0eb;color:var(--accent)">Hindi</span></td><td>R-11</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Notices -->
+        <div class="card">
+          <div class="card-title">📢 Recent Notices</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="notice-title">Annual Sports Day — 5 April</div>
+              <div class="notice-meta">All students must report by 7:30 AM · Posted 2 days ago</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--warn)"></div>
+            <div>
+              <div class="notice-title">Unit Test 2 Schedule Released</div>
+              <div class="notice-meta">Tests from 10–14 April · Posted 3 days ago</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="notice-title">Library Books Return Reminder</div>
+              <div class="notice-meta">Return by 4 April to avoid fine · Posted 5 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Assignments -->
+      <div class="card">
+        <div class="card-title">📝 Upcoming Assignments</div>
+        <div class="assign-item">
+          <div class="assign-check done">✓</div>
+          <div class="assign-title"><b>Science</b> — Chapter 12 questions (pg 145–148)</div>
+          <div class="assign-due">Submitted</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div class="assign-title"><b>Mathematics</b> — Exercise 7.3 (Q1–Q10)</div>
+          <div class="assign-due overdue">Due Today</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div class="assign-title"><b>English</b> — Letter writing (formal) draft</div>
+          <div class="assign-due">Due 2 Apr</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div class="assign-title"><b>History</b> — Map marking — WWII battles</div>
+          <div class="assign-due">Due 4 Apr</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROFILE ── -->
+    <div class="page" id="page-profile">
+      <div class="page-header">
+        <h1>My Profile</h1>
+        <p>Your personal and academic information</p>
+      </div>
+
+      <div class="profile-hero">
+        <div class="avatar-lg">AS</div>
+        <div class="profile-info">
+          <h2>Aarav Nikhil Shah</h2>
+          <div class="sub">Student ID: EDS-2026-1042 · Roll No. 14</div>
+          <div class="profile-tags">
+            <span class="ptag">📚 Std X</span>
+            <span class="ptag">🏫 Division A</span>
+            <span class="ptag">🎓 2025–2026</span>
+            <span class="ptag">🏆 School Topper</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">👤 Personal Details</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">Aarav Nikhil Shah</span></div>
+            <div class="info-row"><span class="info-key">Date of Birth</span><span class="info-val">14 August 2010</span></div>
+            <div class="info-row"><span class="info-key">Gender</span><span class="info-val">Male</span></div>
+            <div class="info-row"><span class="info-key">Blood Group</span><span class="info-val">B+</span></div>
+            <div class="info-row"><span class="info-key">Aadhaar No.</span><span class="info-val">XXXX-XXXX-4521</span></div>
+            <div class="info-row"><span class="info-key">Mobile</span><span class="info-val">+91 98765 43210</span></div>
+            <div class="info-row" style="grid-column:1/-1"><span class="info-key">Address</span><span class="info-val">B-14, Navrangpura, Ahmedabad, Gujarat — 380009</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏫 Academic Details</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">School</span><span class="info-val">Sunrise International School</span></div>
+            <div class="info-row"><span class="info-key">Board</span><span class="info-val">CBSE</span></div>
+            <div class="info-row"><span class="info-key">Class</span><span class="info-val">Standard X (10th)</span></div>
+            <div class="info-row"><span class="info-key">Division</span><span class="info-val">A</span></div>
+            <div class="info-row"><span class="info-key">Roll Number</span><span class="info-val">14</span></div>
+            <div class="info-row"><span class="info-key">Student ID</span><span class="info-val">EDS-2026-1042</span></div>
+            <div class="info-row"><span class="info-key">Admission Date</span><span class="info-val">10 June 2020</span></div>
+            <div class="info-row"><span class="info-key">House</span><span class="info-val">🔴 Phoenix House</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">👨‍👩‍👦 Parent / Guardian</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Father's Name</span><span class="info-val">Nikhil Ramesh Shah</span></div>
+            <div class="info-row"><span class="info-key">Occupation</span><span class="info-val">Business</span></div>
+            <div class="info-row"><span class="info-key">Mother's Name</span><span class="info-val">Priya Nikhil Shah</span></div>
+            <div class="info-row"><span class="info-key">Occupation</span><span class="info-val">Teacher</span></div>
+            <div class="info-row"><span class="info-key">Parent Mobile</span><span class="info-val">+91 99887 76655</span></div>
+            <div class="info-row"><span class="info-key">Email</span><span class="info-val">nikhil.shah@email.com</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏅 Achievements & Extras</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Extra Curricular</span><span class="info-val">Debate Club, Chess</span></div>
+            <div class="info-row"><span class="info-key">Sports</span><span class="info-val">Cricket, Badminton</span></div>
+            <div class="info-row"><span class="info-key">Awards</span><span class="info-val">Best Student 2025</span></div>
+            <div class="info-row"><span class="info-key">Transport</span><span class="info-val">School Bus — Route 7</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIMETABLE ── -->
+    <div class="page" id="page-timetable">
+      <div class="page-header">
+        <h1>Weekly Timetable</h1>
+        <p>Standard X — Division A · Academic Year 2025–26</p>
+      </div>
+      <div class="card" style="overflow-x:auto">
+        <table class="timetable">
+          <thead>
+            <tr>
+              <th>Period</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th>
+            </tr>
+          </thead>
+          <tbody id="tt-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ATTENDANCE ── -->
+    <div class="page" id="page-attendance">
+      <div class="page-header">
+        <h1>Attendance</h1>
+        <p>Subject-wise attendance for current semester</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📊 Subject Attendance</div>
+          <div id="att-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Monthly Summary</div>
+          <table class="marks-table">
+            <thead><tr><th>Month</th><th>Working Days</th><th>Present</th><th>%</th></tr></thead>
+            <tbody>
+              <tr><td>January</td><td>26</td><td>25</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">96%</span></td></tr>
+              <tr><td>February</td><td>24</td><td>22</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">91%</span></td></tr>
+              <tr><td>March</td><td>22</td><td>18</td><td><span class="grade-badge" style="background:#fffaed;color:var(--warn)">81%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MARKS ── -->
+    <div class="page" id="page-marks">
+      <div class="page-header">
+        <h1>Marks & Grades</h1>
+        <p>Unit Test 1 Results · Std X — Div A</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Subject-wise Marks</div>
+        <table class="marks-table">
+          <thead><tr><th>Subject</th><th>Max Marks</th><th>Marks Obtained</th><th>Percentage</th><th>Grade</th><th>Rank</th></tr></thead>
+          <tbody id="marks-body"></tbody>
+        </table>
+      </div>
+      <div style="height:16px"></div>
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf1f9">🏆</div>
+          <div class="stat-val" style="color:var(--accent2)">87.4%</div>
+          <div class="stat-label">Aggregate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf5f1">🥇</div>
+          <div class="stat-val" style="color:var(--accent3)">3rd</div>
+          <div class="stat-label">Class Rank</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fffaed">📈</div>
+          <div class="stat-val" style="color:var(--warn)">A</div>
+          <div class="stat-label">Overall Grade</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ASSIGNMENTS ── -->
+    <div class="page" id="page-assignments">
+      <div class="page-header">
+        <h1>Assignments</h1>
+        <p>Track your pending and submitted work</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 All Assignments</div>
+        <div class="assign-item">
+          <div class="assign-check done">✓</div>
+          <div style="flex:1"><div class="assign-title"><b>Science</b> — Chapter 12: Life Processes Q&A</div><div class="notice-meta">Submitted on 28 March · Score: 9/10</div></div>
+          <div class="assign-due">Submitted</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check done">✓</div>
+          <div style="flex:1"><div class="assign-title"><b>Geography</b> — Map marking: Resource Distribution</div><div class="notice-meta">Submitted on 25 March · Score: 8/10</div></div>
+          <div class="assign-due">Submitted</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div style="flex:1"><div class="assign-title"><b>Mathematics</b> — Exercise 7.3 (Q1–Q10)</div><div class="notice-meta">Triangles chapter</div></div>
+          <div class="assign-due overdue">Due Today</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div style="flex:1"><div class="assign-title"><b>English</b> — Formal letter writing (draft)</div><div class="notice-meta">Min. 250 words</div></div>
+          <div class="assign-due">Due 2 Apr</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div style="flex:1"><div class="assign-title"><b>History</b> — Map marking: WWII Major Battles</div><div class="notice-meta">Reference pg 88–92</div></div>
+          <div class="assign-due">Due 4 Apr</div>
+        </div>
+        <div class="assign-item">
+          <div class="assign-check"></div>
+          <div style="flex:1"><div class="assign-title"><b>Hindi</b> — Nibandh: Swachhata Abhiyan (500 words)</div><div class="notice-meta">Handwritten</div></div>
+          <div class="assign-due">Due 7 Apr</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOTICES ── -->
+    <div class="page" id="page-notices">
+      <div class="page-header">
+        <h1>Notice Board</h1>
+        <p>Stay updated with school announcements</p>
+      </div>
+      <div class="card">
+        <div class="notice-item">
+          <div class="notice-dot" style="background:var(--accent)"></div>
+          <div>
+            <div class="notice-title">🏅 Annual Sports Day — 5 April 2026</div>
+            <div class="notice-meta">Urgent · 29 March 2026</div>
+            <p style="font-size:.86rem;margin-top:6px;color:#444">All students must report by 7:30 AM in house uniform. Participation is compulsory. Parents are welcome. Refreshments will be provided.</p>
+          </div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-dot" style="background:var(--warn)"></div>
+          <div>
+            <div class="notice-title">📝 Unit Test 2 — Schedule Released</div>
+            <div class="notice-meta">Academic · 28 March 2026</div>
+            <p style="font-size:.86rem;margin-top:6px;color:#444">Unit Test 2 will be held from 10–14 April. Syllabus sheets will be distributed by class teachers. Prepare accordingly.</p>
+          </div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-dot" style="background:var(--accent3)"></div>
+          <div>
+            <div class="notice-title">📚 Library Book Return Reminder</div>
+            <div class="notice-meta">General · 26 March 2026</div>
+            <p style="font-size:.86rem;margin-top:6px;color:#444">All students must return borrowed library books by 4 April. A fine of ₹5/day will be levied after the deadline.</p>
+          </div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-dot" style="background:var(--accent2)"></div>
+          <div>
+            <div class="notice-title">🎨 Inter-School Art Competition</div>
+            <div class="notice-meta">Event · 22 March 2026</div>
+            <p style="font-size:.86rem;margin-top:6px;color:#444">Interested students can register with the Art teacher by 2 April. Theme: "Sustainable Future." Open to Std VIII–X.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FEES ── -->
+    <div class="page" id="page-fees">
+      <div class="page-header">
+        <h1>Fees</h1>
+        <p>Fee payment status for 2025–26</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">💳 Fee Summary</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Annual Tuition</span><span class="info-val">₹48,000</span></div>
+            <div class="info-row"><span class="info-key">Paid</span><span class="info-val" style="color:var(--accent3)">₹36,000</span></div>
+            <div class="info-row"><span class="info-key">Balance</span><span class="info-val" style="color:var(--accent)">₹12,000</span></div>
+            <div class="info-row"><span class="info-key">Due Date</span><span class="info-val">30 April 2026</span></div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">Payment progress</div>
+            <div class="att-bar-bg">
+              <div class="att-bar-fill" style="width:75%;background:var(--accent3)"></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">₹36,000 of ₹48,000 paid (75%)</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🧾 Payment History</div>
+          <table class="marks-table">
+            <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>10 Jun 2025</td><td>₹12,000</td><td>Online</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">Paid</span></td></tr>
+              <tr><td>15 Sep 2025</td><td>₹12,000</td><td>UPI</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">Paid</span></td></tr>
+              <tr><td>08 Jan 2026</td><td>₹12,000</td><td>Cheque</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">Paid</span></td></tr>
+              <tr><td>30 Apr 2026</td><td>₹12,000</td><td>—</td><td><span class="grade-badge" style="background:#fffaed;color:var(--warn)">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── NAV ──
+const navItems = document.querySelectorAll('.nav-item');
+const pages = document.querySelectorAll('.page');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const hamburger = document.getElementById('hamburger');
+
+function showPage(name) {
+  navItems.forEach(i => i.classList.remove('active'));
+  pages.forEach(p => p.classList.remove('active'));
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  document.getElementById(`page-${name}`).classList.add('active');
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    showPage(item.dataset.page);
+    closeSidebar();
+  });
+});
+
+hamburger.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', closeSidebar);
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+// ── TIMETABLE DATA ──
+const periods = [
+  {time:'8:00–8:45',   mon:'Mathematics', tue:'Science',     wed:'English',     thu:'Mathematics', fri:'Hindi',       sat:'Science'},
+  {time:'8:45–9:30',   mon:'Science',     tue:'Mathematics', wed:'History',     thu:'English',     fri:'Mathematics', sat:'Geography'},
+  {time:'9:30–9:45',   mon:'—Break—',     tue:'—Break—',     wed:'—Break—',     thu:'—Break—',     fri:'—Break—',     sat:'—Break—'},
+  {time:'9:45–10:30',  mon:'English',     tue:'Hindi',       wed:'Science',     thu:'Geography',   fri:'Science',     sat:'Mathematics'},
+  {time:'10:30–11:15', mon:'History',     tue:'Geography',   wed:'Mathematics', thu:'Hindi',       fri:'Geography',   sat:'English'},
+  {time:'11:15–11:30', mon:'—Break—',     tue:'—Break—',     wed:'—Break—',     thu:'—Break—',     fri:'—Break—',     sat:'—Break—'},
+  {time:'11:30–12:15', mon:'Hindi',       tue:'English',     wed:'Geography',   thu:'Science',     fri:'History',     sat:'—'},
+  {time:'12:15–1:00',  mon:'Geography',   tue:'History',     wed:'Hindi',       thu:'History',     fri:'English',     sat:'—'},
+];
+const subjColor = {
+  'Mathematics':'background:#fdf0eb;color:var(--accent)',
+  'Science':'background:#edf1f9;color:var(--accent2)',
+  'English':'background:#edf5f1;color:var(--accent3)',
+  'History':'background:#fffaed;color:var(--warn)',
+  'Hindi':'background:#fdf0eb;color:var(--accent)',
+  'Geography':'background:#edf1f9;color:var(--accent2)',
+  '—Break—':'background:#f0f0f0;color:#aaa',
+  '—':'',
+};
+const ttBody = document.getElementById('tt-body');
+periods.forEach(p => {
+  const isBreak = p.mon.includes('Break') || p.tue.includes('Break');
+  const tr = document.createElement('tr');
+  if(isBreak) tr.style.background='#fafaf8';
+  const days = ['mon','tue','wed','thu','fri','sat'];
+  let html = `<td style="font-size:.8rem;color:var(--muted);white-space:nowrap">${p.time}</td>`;
+  days.forEach(d => {
+    const s = p[d];
+    const style = subjColor[s] || '';
+    if(s === '—' || s.includes('Break')) {
+      html += `<td style="color:#bbb;font-size:.82rem;text-align:center">${s}</td>`;
+    } else {
+      html += `<td><span class="subj-pill" style="${style}">${s}</span></td>`;
+    }
+  });
+  tr.innerHTML = html;
+  ttBody.appendChild(tr);
+});
+
+// ── ATTENDANCE DATA ──
+const attData = [
+  {subj:'Mathematics', pct:92, color:'var(--accent3)'},
+  {subj:'Science',     pct:88, color:'var(--accent2)'},
+  {subj:'English',     pct:95, color:'var(--accent3)'},
+  {subj:'History',     pct:78, color:'var(--warn)'},
+  {subj:'Hindi',       pct:84, color:'var(--accent2)'},
+  {subj:'Geography',   pct:90, color:'var(--accent3)'},
+];
+const attList = document.getElementById('att-list');
+attData.forEach(a => {
+  const col = a.pct >= 90 ? 'var(--accent3)' : a.pct >= 80 ? 'var(--warn)' : 'var(--accent)';
+  attList.innerHTML += `
+  <div class="att-row">
+    <div class="att-meta">
+      <span style="font-weight:600;font-size:.88rem">${a.subj}</span>
+      <span style="font-weight:700;color:${col}">${a.pct}%</span>
+    </div>
+    <div class="att-bar-bg">
+      <div class="att-bar-fill" style="width:0%;background:${col}" data-w="${a.pct}%"></div>
+    </div>
+  </div>`;
+});
+// Animate bars on page show
+setTimeout(() => {
+  document.querySelectorAll('.att-bar-fill').forEach(b => {
+    b.style.width = b.dataset.w;
+  });
+}, 400);
+
+// ── MARKS DATA ──
+const marksData = [
+  {subj:'Mathematics',  max:80, obt:73, rank:4},
+  {subj:'Science',      max:80, obt:71, rank:5},
+  {subj:'English',      max:80, obt:76, rank:2},
+  {subj:'History',      max:80, obt:66, rank:8},
+  {subj:'Hindi',        max:80, obt:70, rank:6},
+  {subj:'Geography',    max:80, obt:74, rank:3},
+];
+const marksBody = document.getElementById('marks-body');
+marksData.forEach(m => {
+  const pct = ((m.obt/m.max)*100).toFixed(1);
+  const grade = pct>=90?'A+':pct>=80?'A':pct>=70?'B+':pct>=60?'B':'C';
+  const gc = pct>=80?'background:#edf5f1;color:var(--accent3)':pct>=70?'background:#fffaed;color:var(--warn)':'background:#fdf0eb;color:var(--accent)';
+  marksBody.innerHTML += `
+  <tr>
+    <td style="font-weight:600">${m.subj}</td>
+    <td>${m.max}</td>
+    <td>${m.obt}</td>
+    <td>${pct}%</td>
+    <td><span class="grade-badge" style="${gc}">${grade}</span></td>
+    <td style="color:var(--muted)">#${m.rank}</td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
