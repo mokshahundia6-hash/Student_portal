@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduSphere — Teacher Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ed;
+    --card: #ffffff;
+    --ink: #1a1612;
+    --muted: #7a7168;
+    --accent: #c8563a;
+    --accent2: #3a7dc8;
+    --accent3: #4caf7d;
+    --warn: #e8a838;
+    --border: #e4dfd8;
+    --shadow: 0 2px 20px rgba(26,22,18,0.08);
+    --radius: 16px;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 64px;
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #f0a87a; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .portal-switch {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+  }
+  .portal-chip {
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.75);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 600;
+  }
+  .portal-chip.active {
+    background: #fff;
+    color: var(--ink);
+  }
+  .notif-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s;
+    position: relative;
+  }
+  .notif-btn:hover { background: rgba(255,255,255,0.2); }
+  .notif-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: absolute;
+    top: 6px; right: 6px;
+    border: 2px solid var(--ink);
+  }
+  .avatar-small {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0a87a, #c8563a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  .sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .nav-section { margin-bottom: 8px; }
+  .nav-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 24px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: .9rem;
+    font-weight: 400;
+    border-left: 3px solid transparent;
+    transition: all .15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--ink); }
+  .nav-item.active {
+    background: #fdf0eb;
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  .main {
+    padding: 36px 40px;
+    overflow-x: hidden;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeUp .4s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-header { margin-bottom: 32px; }
+  .page-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .page-header p { color: var(--muted); font-size: .92rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(26,22,18,0.12); }
+  .stat-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+  .stat-val {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-label { font-size: .8rem; color: var(--muted); font-weight: 500; }
+  .stat-trend { font-size: .78rem; color: var(--accent3); font-weight: 600; }
+
+  .profile-hero {
+    background: var(--ink);
+    border-radius: var(--radius);
+    padding: 36px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-hero::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(240,168,122,0.12);
+  }
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    right: 40px; bottom: -60px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(200,86,58,0.15);
+  }
+  .avatar-lg {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0a87a, #c8563a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    color: #fff;
+    font-weight: 700;
+    border: 4px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .profile-info { z-index: 1; }
+  .profile-info h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .profile-info .sub {
+    color: rgba(255,255,255,0.65);
+    font-size: .88rem;
+    margin-bottom: 12px;
+  }
+  .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ptag {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: .78rem;
+    font-weight: 500;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .info-key { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+  .info-val { font-size: .92rem; font-weight: 500; color: var(--ink); }
+
+  .table { width: 100%; border-collapse: collapse; }
+  .table th {
+    background: var(--bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+    vertical-align: middle;
+  }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: var(--bg); }
+
+  .subj-pill, .status-pill {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+  .grade-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 700;
+  }
+
+  .notice-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .notice-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .notice-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .notice-title { font-weight: 600; font-size: .9rem; margin-bottom: 2px; }
+  .notice-meta { font-size: .78rem; color: var(--muted); }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .input, .select, .textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font: inherit;
+    color: var(--ink);
+    outline: none;
+  }
+  .textarea { min-height: 110px; resize: vertical; }
+  .input:focus, .select:focus, .textarea:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(58,125,200,0.10);
+  }
+  .btn {
+    border: none;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .15s ease, opacity .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: .95; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--ink); color: #fff; }
+  .btn-soft { background: #fdf0eb; color: var(--accent); }
+  .btn-green { background: #edf5f1; color: var(--accent3); }
+  .btn-blue { background: #edf1f9; color: var(--accent2); }
+
+  .editor-grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 20px;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .attendance-bar-bg {
+    background: var(--bg);
+    border-radius: 99px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .attendance-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+  }
+
+  .kpi-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .mini-kpi {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 12px;
+    padding: 10px 12px;
+    min-width: 120px;
+  }
+  .mini-kpi strong { display: block; font-size: 1rem; color: #fff; }
+  .mini-kpi span { color: rgba(255,255,255,0.68); font-size: .76rem; }
+
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 98;
+  }
+  .overlay.open { display: block; }
+
+  @media (max-width: 1000px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .editor-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .hamburger { display: block; }
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      left: -260px;
+      top: 64px;
+      height: calc(100vh - 64px);
+      width: 240px;
+      z-index: 99;
+      transition: left .3s ease;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+    }
+    .sidebar.open { left: 0; }
+    .main { padding: 24px 18px; }
+    .grid-2, .grid-3, .grid-4, .field-grid { grid-template-columns: 1fr; }
+    .profile-hero { flex-direction: column; text-align: center; gap: 20px; }
+    .profile-tags { justify-content: center; }
+    .info-grid { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 1.5rem; }
+    .portal-switch { display:none; }
+  }
+  @media (max-width: 420px) {
+    .topbar { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="logo">Edu<span>Sphere</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="portal-switch">
+      <button class="portal-chip" onclick="alert('Student portal file can be linked here later.')">Student Portal</button>
+      <button class="portal-chip active">Teacher Portal</button>
+    </div>
+    <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+    <div class="avatar-small" title="Meera Patel">MP</div>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" data-page="dashboard"><span class="nav-icon">🏠</span> Dashboard</div>
+      <div class="nav-item" data-page="profile"><span class="nav-icon">👩‍🏫</span> My Profile</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Classes</div>
+      <div class="nav-item" data-page="classes"><span class="nav-icon">🏫</span> My Classes</div>
+      <div class="nav-item" data-page="students"><span class="nav-icon">👥</span> Students <span class="nav-badge">42</span></div>
+      <div class="nav-item" data-page="attendance"><span class="nav-icon">✅</span> Attendance</div>
+      <div class="nav-item" data-page="marks"><span class="nav-icon">📊</span> Marks Entry</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Management</div>
+      <div class="nav-item" data-page="assignments"><span class="nav-icon">📝</span> Assignments</div>
+      <div class="nav-item" data-page="notices"><span class="nav-icon">📢</span> Notices</div>
+      <div class="nav-item" data-page="portal-access"><span class="nav-icon">🔄</span> Portal Access</div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Good morning, Meera 👋</h1>
+        <p>Teacher Portal · Wednesday, 1 April 2026 · Class Teacher — Std X A</p>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fdf0eb">🏫</div>
+          <div class="stat-val" style="color:var(--accent)">4</div>
+          <div class="stat-label">Classes Handled</div>
+          <div class="stat-trend">Std VIII–X</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf5f1">👥</div>
+          <div class="stat-val" style="color:var(--accent3)">162</div>
+          <div class="stat-label">Students</div>
+          <div class="stat-trend">Across sections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#edf1f9">✅</div>
+          <div class="stat-val" style="color:var(--accent2)">91%</div>
+          <div class="stat-label">Today's Attendance</div>
+          <div class="stat-trend">Updated live</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fffaed">📝</div>
+          <div class="stat-val" style="color:var(--warn)">18</div>
+          <div class="stat-label">Pending Reviews</div>
+          <div class="stat-trend">Marks + assignments</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-title">📅 Today's Teaching Schedule</div>
+          <table class="table">
+            <thead><tr><th>Time</th><th>Class</th><th>Subject</th><th>Room</th></tr></thead>
+            <tbody>
+              <tr><td>8:00 – 8:45</td><td>Std X A</td><td><span class="subj-pill" style="background:#fdf0eb;color:var(--accent)">Mathematics</span></td><td>R-12</td></tr>
+              <tr><td>8:45 – 9:30</td><td>Std IX B</td><td><span class="subj-pill" style="background:#edf1f9;color:var(--accent2)">Science</span></td><td>Lab 2</td></tr>
+              <tr><td>9:45 – 10:30</td><td>Std X A</td><td><span class="subj-pill" style="background:#edf5f1;color:var(--accent3)">Class Mentor</span></td><td>R-12</td></tr>
+              <tr><td>10:30 – 11:15</td><td>Std VIII C</td><td><span class="subj-pill" style="background:#fffaed;color:var(--warn)">Remedial</span></td><td>R-05</td></tr>
+              <tr><td>11:30 – 12:15</td><td>Std IX A</td><td><span class="subj-pill" style="background:#fdf0eb;color:var(--accent)">Mathematics</span></td><td>R-11</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📢 Quick Updates</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="notice-title">Unit Test marks submission closes today</div>
+              <div class="notice-meta">Upload before 5:00 PM</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--warn)"></div>
+            <div>
+              <div class="notice-title">3 parent meetings pending confirmation</div>
+              <div class="notice-meta">Std X A · Roll 07, 14, 28</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="notice-title">Attendance synced to student portal</div>
+              <div class="notice-meta">Last update: 11:12 AM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📈 Class Performance Snapshot</div>
+          <table class="table">
+            <thead><tr><th>Class</th><th>Avg %</th><th>Attendance</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Std X A</td><td>87.4%</td><td>93%</td><td><span class="grade-badge" style="background:#edf5f1;color:var(--accent3)">Strong</span></td></tr>
+              <tr><td>Std IX A</td><td>81.2%</td><td>89%</td><td><span class="grade-badge" style="background:#fffaed;color:var(--warn)">Stable</span></td></tr>
+              <tr><td>Std IX B</td><td>76.8%</td><td>84%</td><td><span class="grade-badge" style="background:#fdf0eb;color:var(--accent)">Needs focus</span></td></tr>
+              <tr><td>Std VIII C</td><td>79.1%</td><td>86%</td><td><span class="grade-badge" style="background:#fffaed;color:var(--warn)">Watchlist</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📝 Recent Activity</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="notice-title">Attendance marked for Std X A</div>
+              <div class="notice-meta">42 students · 3 absent</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="notice-title">Assignment posted to student portal</div>
+              <div class="notice-meta">Mathematics · Exercise 7.3</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--warn)"></div>
+            <div>
+              <div class="notice-title">5 marks updated in draft mode</div>
+              <div class="notice-meta">Not yet published to students</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-profile">
+      <div class="page-header">
+        <h1>My Profile</h1>
+        <p>Teacher information and assigned responsibilities</p>
+      </div>
+
+      <div class="profile-hero">
+        <div class="avatar-lg">MP</div>
+        <div class="profile-info">
+          <h2>Meera Rakesh Patel</h2>
+          <div class="sub">Teacher ID: EDT-2026-018 · Mathematics Department</div>
+          <div class="profile-tags">
+            <span class="ptag">👩‍🏫 Class Teacher — Std X A</span>
+            <span class="ptag">📚 Mathematics</span>
+            <span class="ptag">🏫 Sunrise International School</span>
+            <span class="ptag">🎓 8 Years Experience</span>
+          </div>
+          <div class="kpi-strip">
+            <div class="mini-kpi"><strong>162</strong><span>Total Students</span></div>
+            <div class="mini-kpi"><strong>4</strong><span>Classes</span></div>
+            <div class="mini-kpi"><strong>96%</strong><span>Data Sync Rate</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">👤 Personal Details</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">Meera Rakesh Patel</span></div>
+            <div class="info-row"><span class="info-key">Teacher ID</span><span class="info-val">EDT-2026-018</span></div>
+            <div class="info-row"><span class="info-key">Mobile</span><span class="info-val">+91 98765 00112</span></div>
+            <div class="info-row"><span class="info-key">Email</span><span class="info-val">meera.patel@edusphere.edu</span></div>
+            <div class="info-row"><span class="info-key">Qualification</span><span class="info-val">M.Sc. Mathematics, B.Ed.</span></div>
+            <div class="info-row"><span class="info-key">Experience</span><span class="info-val">8 Years</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏫 School Role</div>
+          <div class="info-grid">
+            <div class="info-row"><span class="info-key">Department</span><span class="info-val">Mathematics</span></div>
+            <div class="info-row"><span class="info-key">Class Teacher</span><span class="info-val">Standard X — Division A</span></div>
+            <div class="info-row"><span class="info-key">Assigned Classes</span><span class="info-val">VIII C, IX A, IX B, X A</span></div>
+            <div class="info-row"><span class="info-key">Role Access</span><span class="info-val">Teacher + Student portal control</span></div>
+            <div class="info-row"><span class="info-key">Working Hours</span><span class="info-val">7:30 AM – 2:30 PM</span></div>
+            <div class="info-row"><span class="info-key">Room</span><span class="info-val">Staff Room 2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-classes">
+      <div class="page-header">
+        <h1>My Classes</h1>
+        <p>Overview of all assigned classes</p>
+      </div>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>Class</th><th>Subject</th><th>Students</th><th>Avg %</th><th>Attendance</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Std X A</td><td>Mathematics</td><td>42</td><td>87.4%</td><td>93%</td><td><button class="btn btn-soft" onclick="showPage('students')">Open</button></td></tr>
+            <tr><td>Std IX A</td><td>Mathematics</td><td>39</td><td>81.2%</td><td>89%</td><td><button class="btn btn-soft" onclick="showPage('students')">Open</button></td></tr>
+            <tr><td>Std IX B</td><td>Mathematics</td><td>41</td><td>76.8%</td><td>84%</td><td><button class="btn btn-soft" onclick="showPage('students')">Open</button></td></tr>
+            <tr><td>Std VIII C</td><td>Remedial</td><td>40</td><td>79.1%</td><td>86%</td><td><button class="btn btn-soft" onclick="showPage('students')">Open</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-students">
+      <div class="page-header">
+        <h1>Students Directory</h1>
+        <p>Teacher can search, review, and edit student data</p>
+      </div>
+
+      <div class="editor-grid">
+        <div class="card">
+          <div class="card-title">👥 Student List</div>
+          <div class="toolbar">
+            <input class="input" id="studentSearch" placeholder="Search by name / roll / class..." oninput="filterStudents()">
+          </div>
+          <table class="table">
+            <thead><tr><th>Roll</th><th>Name</th><th>Class</th><th>Attendance</th><th>Action</th></tr></thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">✏️ Edit Student</div>
+          <div class="field-grid">
+            <div>
+              <label class="notice-meta">Full Name</label>
+              <input class="input" id="sName" value="Aarav Nikhil Shah">
+            </div>
+            <div>
+              <label class="notice-meta">Roll Number</label>
+              <input class="input" id="sRoll" value="14">
+            </div>
+            <div>
+              <label class="notice-meta">Class</label>
+              <select class="select" id="sClass">
+                <option>Std X A</option>
+                <option>Std IX A</option>
+                <option>Std IX B</option>
+                <option>Std VIII C</option>
+              </select>
+            </div>
+            <div>
+              <label class="notice-meta">Parent Contact</label>
+              <input class="input" id="sParent" value="+91 99887 76655">
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="notice-meta">Address</label>
+              <textarea class="textarea" id="sAddress">B-14, Navrangpura, Ahmedabad, Gujarat — 380009</textarea>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:16px">
+            <button class="btn btn-primary" onclick="saveStudent()">Save Changes</button>
+            <button class="btn btn-blue" onclick="resetStudentForm()">Reset</button>
+          </div>
+          <div id="studentSavedMsg" class="notice-meta" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-attendance">
+      <div class="page-header">
+        <h1>Attendance Manager</h1>
+        <p>Mark attendance and publish it to the student portal</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">✅ Quick Attendance</div>
+          <div class="field-grid">
+            <div>
+              <label class="notice-meta">Class</label>
+              <select class="select" id="attClass">
+                <option>Std X A</option>
+                <option>Std IX A</option>
+                <option>Std IX B</option>
+                <option>Std VIII C</option>
+              </select>
+            </div>
+            <div>
+              <label class="notice-meta">Date</label>
+              <input class="input" type="date" id="attDate" value="2026-04-01">
+            </div>
+          </div>
+          <table class="table" style="margin-top:16px">
+            <thead><tr><th>Roll</th><th>Name</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>07</td><td>Diya Joshi</td><td><select class="select"><option>Present</option><option>Absent</option><option>Late</option></select></td></tr>
+              <tr><td>14</td><td>Aarav Shah</td><td><select class="select"><option>Present</option><option>Absent</option><option>Late</option></select></td></tr>
+              <tr><td>21</td><td>Kabir Mehta</td><td><select class="select"><option>Present</option><option>Absent</option><option>Late</option></select></td></tr>
+              <tr><td>28</td><td>Riya Patel</td><td><select class="select"><option>Present</option><option>Absent</option><option>Late</option></select></td></tr>
+            </tbody>
+          </table>
+          <div class="toolbar" style="margin-top:16px">
+            <button class="btn btn-primary" onclick="syncToast('Attendance saved and student portal updated.')">Save Attendance</button>
+            <button class="btn btn-green" onclick="syncToast('Attendance published successfully.')">Publish to Student Portal</button>
+          </div>
+          <div id="syncMsg1" class="notice-meta"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Attendance Summary</div>
+          <div style="margin-bottom:16px">
+            <div class="notice-meta" style="margin-bottom:6px">Std X A</div>
+            <div class="attendance-bar-bg"><div class="attendance-bar-fill" style="width:93%;background:var(--accent3)"></div></div>
+            <div class="notice-meta" style="margin-top:5px">93% monthly attendance</div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div class="notice-meta" style="margin-bottom:6px">Std IX A</div>
+            <div class="attendance-bar-bg"><div class="attendance-bar-fill" style="width:89%;background:var(--warn)"></div></div>
+            <div class="notice-meta" style="margin-top:5px">89% monthly attendance</div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div class="notice-meta" style="margin-bottom:6px">Std IX B</div>
+            <div class="attendance-bar-bg"><div class="attendance-bar-fill" style="width:84%;background:var(--accent2)"></div></div>
+            <div class="notice-meta" style="margin-top:5px">84% monthly attendance</div>
+          </div>
+          <div>
+            <div class="notice-meta" style="margin-bottom:6px">Std VIII C</div>
+            <div class="attendance-bar-bg"><div class="attendance-bar-fill" style="width:86%;background:var(--accent)"></div></div>
+            <div class="notice-meta" style="margin-top:5px">86% monthly attendance</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-marks">
+      <div class="page-header">
+        <h1>Marks Entry</h1>
+        <p>Teacher can input, edit, and publish marks</p>
+      </div>
+
+      <div class="editor-grid">
+        <div class="card">
+          <div class="card-title">📊 Marks Sheet</div>
+          <table class="table">
+            <thead><tr><th>Roll</th><th>Name</th><th>Test</th><th>Marks</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>07</td><td>Diya Joshi</td><td>Unit Test 2</td><td><input class="input" value="74" style="max-width:90px"></td><td><span class="status-pill" style="background:#edf1f9;color:var(--accent2)">Draft</span></td></tr>
+              <tr><td>14</td><td>Aarav Shah</td><td>Unit Test 2</td><td><input class="input" value="76" style="max-width:90px"></td><td><span class="status-pill" style="background:#edf1f9;color:var(--accent2)">Draft</span></td></tr>
+              <tr><td>21</td><td>Kabir Mehta</td><td>Unit Test 2</td><td><input class="input" value="69" style="max-width:90px"></td><td><span class="status-pill" style="background:#edf1f9;color:var(--accent2)">Draft</span></td></tr>
+              <tr><td>28</td><td>Riya Patel</td><td>Unit Test 2</td><td><input class="input" value="71" style="max-width:90px"></td><td><span class="status-pill" style="background:#edf1f9;color:var(--accent2)">Draft</span></td></tr>
+            </tbody>
+          </table>
+          <div class="toolbar" style="margin-top:16px">
+            <button class="btn btn-primary" onclick="syncToastMarks('Marks saved in draft mode.')">Save Draft</button>
+            <button class="btn btn-green" onclick="syncToastMarks('Marks published to student portal.')">Publish Marks</button>
+          </div>
+          <div id="syncMsg2" class="notice-meta"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🧮 Summary</div>
+          <div class="grid-2">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#edf5f1">📈</div>
+              <div class="stat-val" style="color:var(--accent3)">72.5</div>
+              <div class="stat-label">Class Average</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#edf1f9">🏆</div>
+              <div class="stat-val" style="color:var(--accent2)">76</div>
+              <div class="stat-label">Highest Marks</div>
+            </div>
+          </div>
+          <div style="height:14px"></div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="notice-title">Teacher control</div>
+              <div class="notice-meta">Edit marks here, then publish to student side.</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="notice-title">Student visibility</div>
+              <div class="notice-meta">Students only see published data.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-assignments">
+      <div class="page-header">
+        <h1>Assignments</h1>
+        <p>Create and manage homework for students</p>
+      </div>
+      <div class="editor-grid">
+        <div class="card">
+          <div class="card-title">📝 Create Assignment</div>
+          <div class="field-grid">
+            <div>
+              <label class="notice-meta">Subject</label>
+              <select class="select" id="assignSubject">
+                <option>Mathematics</option>
+                <option>Science</option>
+                <option>English</option>
+                <option>History</option>
+              </select>
+            </div>
+            <div>
+              <label class="notice-meta">Due Date</label>
+              <input class="input" type="date" id="assignDue" value="2026-04-04">
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="notice-meta">Title</label>
+              <input class="input" id="assignTitle" value="Exercise 7.3 (Q1–Q10)">
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="notice-meta">Description</label>
+              <textarea class="textarea" id="assignDesc">Complete all questions neatly in notebook and upload before deadline.</textarea>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:16px">
+            <button class="btn btn-primary" onclick="syncToastAssign('Assignment saved and shared with students.')">Post Assignment</button>
+          </div>
+          <div id="syncMsg3" class="notice-meta"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📚 Posted Assignments</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="notice-title">Mathematics — Exercise 7.3</div>
+              <div class="notice-meta">Due 4 Apr · Shared to Std X A</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="notice-title">Science — Chapter 12 Worksheet</div>
+              <div class="notice-meta">Due 5 Apr · Shared to Std IX B</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--warn)"></div>
+            <div>
+              <div class="notice-title">English — Formal Letter Draft</div>
+              <div class="notice-meta">Due 2 Apr · Shared to Std X A</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-notices">
+      <div class="page-header">
+        <h1>School Notices</h1>
+        <p>Create announcements and publish them across portals</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📢 Post Notice</div>
+          <div class="field-grid">
+            <div style="grid-column:1/-1">
+              <label class="notice-meta">Notice Title</label>
+              <input class="input" id="noticeTitle" value="Unit Test 2 Schedule Released">
+            </div>
+            <div style="grid-column:1/-1">
+              <label class="notice-meta">Message</label>
+              <textarea class="textarea" id="noticeMessage">Unit Test 2 will be held from 10–14 April. Please prepare according to syllabus.</textarea>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:16px">
+            <button class="btn btn-primary" onclick="syncToastNotice('Notice published to both portals.')">Publish Notice</button>
+          </div>
+          <div id="syncMsg4" class="notice-meta"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📌 Latest Notices</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div><div class="notice-title">Annual Sports Day — 5 April</div><div class="notice-meta">Visible on student portal</div></div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--warn)"></div>
+            <div><div class="notice-title">Unit Test 2 Schedule Released</div><div class="notice-meta">Visible on both portals</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-portal-access">
+      <div class="page-header">
+        <h1>Portal Access Control</h1>
+        <p>Teacher can manage student-facing data and switch between both portal views</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🔄 Access Settings</div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="notice-title">Teacher can edit student data</div>
+              <div class="notice-meta">Enabled</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="notice-title">Attendance sync to student portal</div>
+              <div class="notice-meta">Automatic after publish</div>
+            </div>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="notice-title">Marks visibility control</div>
+              <div class="notice-meta">Draft / Published</div>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:14px">
+            <button class="btn btn-secondary" onclick="alert('Later you can link this button to your student-portal.html file.')">Open Student Portal View</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💡 What this portal supports</div>
+          <table class="table">
+            <thead><tr><th>Feature</th><th>Teacher</th><th>Student</th></tr></thead>
+            <tbody>
+              <tr><td>Edit profile data</td><td>Yes</td><td>No</td></tr>
+              <tr><td>Input attendance</td><td>Yes</td><td>Read only</td></tr>
+              <tr><td>Input marks</td><td>Yes</td><td>Read only</td></tr>
+              <tr><td>Create notices</td><td>Yes</td><td>Read only</td></tr>
+              <tr><td>Create assignments</td><td>Yes</td><td>View + submit</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const navItems = document.querySelectorAll('.nav-item');
+const pages = document.querySelectorAll('.page');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const hamburger = document.getElementById('hamburger');
+
+function showPage(name) {
+  navItems.forEach(i => i.classList.remove('active'));
+  pages.forEach(p => p.classList.remove('active'));
+  const nav = document.querySelector(`[data-page="${name}"]`);
+  const page = document.getElementById(`page-${name}`);
+  if (nav) nav.classList.add('active');
+  if (page) page.classList.add('active');
+  closeSidebar();
+}
+window.showPage = showPage;
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => showPage(item.dataset.page));
+});
+
+hamburger.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', closeSidebar);
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+const students = [
+  {roll:'07', name:'Diya Joshi', className:'Std X A', attendance:'94%'},
+  {roll:'14', name:'Aarav Nikhil Shah', className:'Std X A', attendance:'88%'},
+  {roll:'21', name:'Kabir Mehta', className:'Std X A', attendance:'90%'},
+  {roll:'28', name:'Riya Patel', className:'Std X A', attendance:'84%'},
+  {roll:'31', name:'Vivaan Shah', className:'Std IX A', attendance:'86%'}
+];
+
+function renderStudents(list = students) {
+  const tbody = document.getElementById('studentTableBody');
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td>${s.roll}</td>
+      <td>${s.name}</td>
+      <td>${s.className}</td>
+      <td>${s.attendance}</td>
+      <td><button class="btn btn-soft" onclick="loadStudent('${s.name}','${s.roll}','${s.className}')">Edit</button></td>
+    </tr>
+  `).join('');
+}
+renderStudents();
+
+window.filterStudents = function() {
+  const q = document.getElementById('studentSearch').value.toLowerCase().trim();
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.roll.toLowerCase().includes(q) ||
+    s.className.toLowerCase().includes(q)
+  );
+  renderStudents(filtered);
+}
+
+window.loadStudent = function(name, roll, className) {
+  document.getElementById('sName').value = name;
+  document.getElementById('sRoll').value = roll;
+  document.getElementById('sClass').value = className;
+  document.getElementById('studentSavedMsg').textContent = 'Student loaded for editing.';
+}
+
+window.saveStudent = function() {
+  document.getElementById('studentSavedMsg').textContent = 'Changes saved successfully.';
+}
+window.resetStudentForm = function() {
+  document.getElementById('sName').value = 'Aarav Nikhil Shah';
+  document.getElementById('sRoll').value = '14';
+  document.getElementById('sClass').value = 'Std X A';
+  document.getElementById('sParent').value = '+91 99887 76655';
+  document.getElementById('sAddress').value = 'B-14, Navrangpura, Ahmedabad, Gujarat — 380009';
+  document.getElementById('studentSavedMsg').textContent = 'Form reset.';
+}
+
+window.syncToast = function(msg) {
+  document.getElementById('syncMsg1').textContent = msg;
+}
+window.syncToastMarks = function(msg) {
+  document.getElementById('syncMsg2').textContent = msg;
+}
+window.syncToastAssign = function(msg) {
+  document.getElementById('syncMsg3').textContent = msg;
+}
+window.syncToastNotice = function(msg) {
+  document.getElementById('syncMsg4').textContent = msg;
+}
+</script>
+</body>
+</html>
